@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "REPLACE-ME-VpcId"
+  },
+  {
+    "ParameterKey": "RouteTableIds",
+    "ParameterValue": "REPLACE-ME-RouteTableIds"
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "name": "dynamodb-vpc-endpoint",
+  "region": "us-east-1",
+  "hasParameters": true,
+  "action": "recreate"
+}

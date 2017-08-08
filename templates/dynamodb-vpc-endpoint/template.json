@@ -1,0 +1,38 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "VpcId": {
+      "Description": "Id for VPC",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "RouteTableIds": {
+      "Description": "A list of route table Ids",
+      "Type": "CommaDelimitedList"
+    }
+  },
+  "Resources": {
+    "vpcEndpointForDynamoDB": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": {
+          "Ref": "RouteTableIds"
+        },
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".dynamodb"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    }
+  }
+}
