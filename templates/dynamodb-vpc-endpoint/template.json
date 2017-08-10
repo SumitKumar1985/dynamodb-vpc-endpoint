@@ -9,13 +9,10 @@
       "Description": "A list of route table Ids",
       "Type": "CommaDelimitedList"
     },
-    "appRepositoryUrl": {
+    "AppRepositoryUrl": {
       "Description": "Location of the git repository containing app source code",
-      "Type": "String"
-    },
-    "KeyName": {
-      "Description": "Name of public key",
-      "Type": "String"
+      "Type": "String",
+      "Default": "https://github.com/krishnan-mani/xapp.git"
     }
   },
   "Resources": {
@@ -93,9 +90,6 @@
         "IamInstanceProfile": {
           "Ref": "instanceProfile"
         },
-        "KeyName": {
-          "Ref": "KeyName"
-        },
         "Tags": [
           {
             "Key": "Name",
@@ -120,7 +114,7 @@
                     [
                       "git clone",
                       {
-                        "Ref": "appRepositoryUrl"
+                        "Ref": "AppRepositoryUrl"
                       },
                       "/opt/dynamodb-vpc-endpoint \n"
                     ]

@@ -6,5 +6,9 @@
   {
     "ParameterKey": "RouteTableIds",
     "ParameterValue": "REPLACE-ME-RouteTableIds"
+  },
+  {
+    "ParameterKey": "AppRepositoryUrl",
+    "ParameterValue": "REPLACE-ME-AppRepositoryUrl"
   }
 ]
