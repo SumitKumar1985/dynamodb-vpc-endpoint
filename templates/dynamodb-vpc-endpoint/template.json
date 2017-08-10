@@ -127,7 +127,11 @@
                   ]
                 },
                 "chown -R ec2-user:ec2-user /opt/dynamodb-vpc-endpoint \n",
-                "sudo -u ec2-user bash -c 'source /etc/profile.d/rvm.sh && cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer && gem install --no-ri --no-rdoc bundler && bundle install --binstubs && whenever --update-crontab'\n",
+                "sudo -u ec2-user bash -c 'source /etc/profile.d/rvm.sh && cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer && gem install --no-ri --no-rdoc bundler && bundle install --binstubs && AWS_REGION=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " whenever --update-crontab'\n",
                 {
                   "Fn::Join": [
                     " ",
