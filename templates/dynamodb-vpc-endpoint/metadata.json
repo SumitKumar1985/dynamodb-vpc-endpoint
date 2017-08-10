@@ -2,5 +2,8 @@
   "name": "dynamodb-vpc-endpoint",
   "region": "us-east-1",
   "hasParameters": true,
-  "action": "recreate"
+  "action": "recreate",
+  "capabilities": [
+    "CAPABILITY_IAM"
+  ]
 }

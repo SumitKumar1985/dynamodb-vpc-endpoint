@@ -8,9 +8,154 @@
     "RouteTableIds": {
       "Description": "A list of route table Ids",
       "Type": "CommaDelimitedList"
+    },
+    "appRepositoryUrl": {
+      "Description": "Location of the git repository containing app source code",
+      "Type": "String"
+    },
+    "KeyName": {
+      "Description": "Name of public key",
+      "Type": "String"
     }
   },
   "Resources": {
+    "dynamoDBWriteRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "writer",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Join": [
+                      ":",
+                      [
+                        "arn:aws:dynamodb",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        "table/items_every_minute"
+                      ]
+                    ]
+                  },
+                  "Action": [
+                    "dynamodb:PutItem",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:CreateTable"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "instanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "dynamoDBWriteRole"
+          }
+        ]
+      }
+    },
+    "appInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t2.large",
+        "ImageId": "ami-a4c7edb2",
+        "IamInstanceProfile": {
+          "Ref": "instanceProfile"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "dynamodb-writer-app"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe \n",
+                "yum install -y gcc openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel ruby-devel gcc-c++ jq git \n",
+                "gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB \n",
+                "curl -sSL https://get.rvm.io | bash -s stable \n",
+                "usermod -a -G rvm ec2-user \n",
+                "source /etc/profile.d/rvm.sh \n",
+                "rvm install 2.4 \n",
+                {
+                  "Fn::Join": [
+                    " ",
+                    [
+                      "git clone",
+                      {
+                        "Ref": "appRepositoryUrl"
+                      },
+                      "/opt/dynamodb-vpc-endpoint \n"
+                    ]
+                  ]
+                },
+                "chown -R ec2-user:ec2-user /opt/dynamodb-vpc-endpoint \n",
+                "sudo -u ec2-user bash -c 'cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer'\n",
+                "sudo -u ec2-user bash -c 'cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer && gem install bundler'\n",
+                "sudo -u ec2-user bash -c 'cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer && bundle install --binstubs'\n",
+                "sudo -u ec2-user bash -c 'cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer && whenever --update-crontab '\n",
+                {
+                  "Fn::Join": [
+                    " ",
+                    [
+                      "/opt/aws/bin/cfn-init",
+                      "--region",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "-s",
+                      {
+                        "Ref": "AWS::StackId"
+                      },
+                      "-r",
+                      "workshopInstance",
+                      "-v"
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
     "vpcEndpointForDynamoDB": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
