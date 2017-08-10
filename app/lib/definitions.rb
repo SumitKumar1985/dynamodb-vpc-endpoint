@@ -19,7 +19,7 @@ module Definitions
   end
 
   def self.get_time_string
-    Time.new.strftime('%Y%m%dT%H%M%S%z')
+    Time.new.strftime('%Y%m%dT%H%M%z')
   end
 
 end
