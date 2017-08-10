@@ -1,0 +1,24 @@
+require_relative 'lib/definitions'
+require_relative 'lib/writer'
+
+
+desc 'writes item locally'
+task :write_item_locally do
+  config = {
+      access_key_id: 'aki',
+      secret_access_key: 'sak',
+      endpoint: 'http://localhost:8000'
+  }
+  writer = Writer.new(Definitions::table_definition, config)
+  now = Definitions::get_time_string
+  writer.write_item_for_minute(now)
+end
+
+desc 'write item to AWS'
+task :write_item, :region do |t, args|
+  region = args.region or raise "Missing AWS region"
+  config = {region: region}
+  writer = Writer.new(Definitions::table_definition, config)
+  now = Definitions::get_time_string
+  writer.write_item_for_minute(now)
+end
