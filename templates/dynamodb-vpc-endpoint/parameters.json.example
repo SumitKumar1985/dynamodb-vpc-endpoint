@@ -1,14 +1,18 @@
 [
   {
-    "ParameterKey": "VpcId",
-    "ParameterValue": "REPLACE-ME-VpcId"
-  },
-  {
     "ParameterKey": "RouteTableId",
     "ParameterValue": "REPLACE-ME-RouteTableId"
   },
   {
-    "ParameterKey": "AppRepositoryUrl",
-    "ParameterValue": "REPLACE-ME-AppRepositoryUrl"
+    "ParameterKey": "VpcId",
+    "ParameterValue": "REPLACE-ME-VpcId"
+  },
+  {
+    "ParameterKey": "ScriptsLocation",
+    "ParameterValue": "REPLACE-ME-ScriptsLocation"
+  },
+  {
+    "ParameterKey": "PrivateSubnetCidrBlock",
+    "ParameterValue": "172.31.192.0/28"
   }
 ]

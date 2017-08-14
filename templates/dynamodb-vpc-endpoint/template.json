@@ -11,18 +11,12 @@
     },
     "ScriptsLocation": {
       "Description": "public Location of the scripts",
-      "Type": "String",
-      "Default": "https://raw.githubusercontent.com/krishnan-mani/xapp/develop/scripting/"
+      "Type": "String"
     },
     "PrivateSubnetCidrBlock": {
       "Description": "CIDR to be assigned to the private subnet",
       "Type": "String",
-      "Default": "172.31.160.0/20"
-    },
-    "PrivateAccessKey": {
-      "Description": "Name of a public key to use to access the private instances",
-      "Type": "AWS::EC2::KeyPair::KeyName",
-      "Default": "access"
+      "Default": "172.31.192.0/28"
     }
   },
   "Resources": {
@@ -123,9 +117,6 @@
         "ImageId": "ami-a4c7edb2",
         "IamInstanceProfile": {
           "Ref": "instanceProfile"
-        },
-        "KeyName": {
-          "Ref": "PrivateAccessKey"
         },
         "SubnetId": {
           "Ref": "privateSubnet"
