@@ -1,0 +1,6 @@
+- add AMI mappings for all regions
+- whitelist account in all regions
+- test in all regions
+- change code to use just AWS CLI and scripting
+- add hostname to document
+- add TTL

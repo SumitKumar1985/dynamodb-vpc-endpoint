@@ -4,8 +4,8 @@
     "ParameterValue": "REPLACE-ME-VpcId"
   },
   {
-    "ParameterKey": "RouteTableIds",
-    "ParameterValue": "REPLACE-ME-RouteTableIds"
+    "ParameterKey": "RouteTableId",
+    "ParameterValue": "REPLACE-ME-RouteTableId"
   },
   {
     "ParameterKey": "AppRepositoryUrl",

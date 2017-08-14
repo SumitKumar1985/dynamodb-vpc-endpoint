@@ -5,14 +5,24 @@
       "Description": "Id for VPC",
       "Type": "AWS::EC2::VPC::Id"
     },
-    "RouteTableIds": {
-      "Description": "A list of route table Ids",
-      "Type": "CommaDelimitedList"
+    "RouteTableId": {
+      "Description": "A route table Id to associate with the VPC endpoint",
+      "Type": "String"
     },
     "AppRepositoryUrl": {
       "Description": "Location of the git repository containing app source code",
       "Type": "String",
       "Default": "https://github.com/krishnan-mani/xapp.git"
+    },
+    "PrivateSubnetCidrBlock": {
+      "Description": "CIDR to be assigned to the private subnet",
+      "Type": "String",
+      "Default": "172.31.160.0/20"
+    },
+    "PrivateAccessKey": {
+      "Description": "Name of a public key to use to access the private instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "access"
     }
   },
   "Resources": {
@@ -82,6 +92,29 @@
         ]
       }
     },
+    "privateSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "PrivateSubnetCidrBlock"
+        },
+        "MapPublicIpOnLaunch": false,
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    },
+    "privateSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "RouteTableId"
+        },
+        "SubnetId": {
+          "Ref": "privateSubnet"
+        }
+      }
+    },
     "appInstance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
@@ -89,6 +122,12 @@
         "ImageId": "ami-a4c7edb2",
         "IamInstanceProfile": {
           "Ref": "instanceProfile"
+        },
+        "KeyName": {
+          "Ref": "PrivateAccessKey"
+        },
+        "SubnetId": {
+          "Ref": "privateSubnet"
         },
         "Tags": [
           {
@@ -154,9 +193,11 @@
     "vpcEndpointForDynamoDB": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
-        "RouteTableIds": {
-          "Ref": "RouteTableIds"
-        },
+        "RouteTableIds": [
+          {
+            "Ref": "RouteTableId"
+          }
+        ],
         "ServiceName": {
           "Fn::Join": [
             "",
