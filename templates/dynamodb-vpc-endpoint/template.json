@@ -9,10 +9,10 @@
       "Description": "A route table Id to associate with the VPC endpoint",
       "Type": "String"
     },
-    "AppRepositoryUrl": {
-      "Description": "Location of the git repository containing app source code",
+    "ScriptsLocation": {
+      "Description": "public Location of the scripts",
       "Type": "String",
-      "Default": "https://github.com/krishnan-mani/xapp.git"
+      "Default": "https://raw.githubusercontent.com/krishnan-mani/xapp/develop/scripting/"
     },
     "PrivateSubnetCidrBlock": {
       "Description": "CIDR to be assigned to the private subnet",
@@ -72,7 +72,8 @@
                   "Action": [
                     "dynamodb:PutItem",
                     "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
+                    "dynamodb:CreateTable",
+                    "dynamodb:UpdateTimeToLive"
                   ]
                 }
               ]
@@ -141,30 +142,34 @@
               "",
               [
                 "#!/bin/bash -xe \n",
-                "yum install -y gcc openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel ruby-devel gcc-c++ jq git \n",
-                "gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB \n",
-                "curl -sSL https://get.rvm.io | bash -s stable \n",
-                "usermod -a -G rvm ec2-user \n",
-                "source /etc/profile.d/rvm.sh \n",
-                "rvm install 2.4 \n",
-                {
-                  "Fn::Join": [
-                    " ",
-                    [
-                      "git clone",
-                      {
-                        "Ref": "AppRepositoryUrl"
-                      },
-                      "/opt/dynamodb-vpc-endpoint \n"
-                    ]
-                  ]
-                },
-                "chown -R ec2-user:ec2-user /opt/dynamodb-vpc-endpoint \n",
-                "sudo -u ec2-user bash -c 'source /etc/profile.d/rvm.sh && cd /opt/dynamodb-vpc-endpoint/app && rvm gemset use --create 2.4.0@writer && gem install --no-ri --no-rdoc bundler && bundle install --binstubs && AWS_REGION=",
+                "sudo -u ec2-user aws configure set region ",
                 {
                   "Ref": "AWS::Region"
                 },
-                " whenever --update-crontab'\n",
+                " \n",
+                "curl ",
+                {
+                  "Ref": "ScriptsLocation"
+                },
+                "/table_definition.json -o /home/ec2-user/table_definition.json \n",
+                "curl ",
+                {
+                  "Ref": "ScriptsLocation"
+                },
+                "/put_items_every_minute.sh -o /home/ec2-user/put_items_every_minute.sh \n",
+                "curl ",
+                {
+                  "Ref": "ScriptsLocation"
+                },
+                "/generate_cron_entry.sh -o /home/ec2-user/generate_cron_entry.sh \n",
+                "chown ec2-user:ec2-user /home/ec2-user/* \n",
+                "chmod u+x /home/ec2-user/*.sh \n",
+                "chmod u+r /home/ec2-user/*.json \n",
+                "sudo -u ec2-user bash /home/ec2-user/generate_cron_entry.sh ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " \n",
                 {
                   "Fn::Join": [
                     " ",

@@ -12,6 +12,5 @@ fi
 
 REGION="$1"
 
-crontab -l > /tmp/mycron
 echo "* * * * * /home/ec2-user/put_items_every_minute.sh ${REGION}" > /tmp/mycron
 crontab /tmp/mycron
