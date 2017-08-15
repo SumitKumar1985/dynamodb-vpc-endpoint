@@ -14,6 +14,20 @@ Instructions
   - A demo table in DynamoDB
   - An EC2 instance that runs a script to put items every minute into the demo table (using the VPC endpoint)
   
+- One way to provision a stack is as follows:
+  
+```
+
+# replace CHOSEN-VPC-ID in the below
+
+$ aws --region us-east-1 cloudformation create-stack \ 
+      --stack-name dynamodb-vpc-endpoint-context-virginia \ 
+      --template-body file://template.json \ 
+      --parameters ParameterKey=VpcId,ParameterValue=CHOSEN-VPC-ID \
+      --capabilities CAPABILITY_IAM
+
+```
+  
 Current limitations
 ====
 
