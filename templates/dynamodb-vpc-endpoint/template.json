@@ -5,8 +5,12 @@
       "Description": "Id for VPC",
       "Type": "AWS::EC2::VPC::Id"
     },
+    "PublicSubnetId": {
+      "Description": "A public subnet to launch the demo instance",
+      "Type": "String"
+    },
     "RouteTableId": {
-      "Description": "A route table Id to associate with the VPC endpoint",
+      "Description": "The route table Id for the designated public subnet",
       "Type": "String"
     },
     "ScriptsLocation": {
@@ -14,15 +18,20 @@
       "Type": "String",
       "Default": "https://raw.githubusercontent.com/krishnan-mani/xapp/develop/scripting"
     },
-    "PrivateSubnetCidrBlock": {
-      "Description": "CIDR to be assigned to the private subnet",
-      "Type": "String",
-      "Default": "172.31.192.0/28"
-    },
     "TableName": {
       "Description": "Name of the DynamoDB table for demonstration",
       "Type": "String",
       "Default": "demo_items_every_minute"
+    }
+  },
+  "Mappings": {
+    "RegionMap": {
+      "ap-south-1": {
+        "AMI": "ami-47205e28"
+      },
+      "us-east-1": {
+        "AMI": "ami-a4c7edb2"
+      }
     }
   },
   "Resources": {
@@ -96,39 +105,24 @@
         ]
       }
     },
-    "privateSubnet": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "CidrBlock": {
-          "Ref": "PrivateSubnetCidrBlock"
-        },
-        "MapPublicIpOnLaunch": false,
-        "VpcId": {
-          "Ref": "VpcId"
-        }
-      }
-    },
-    "privateSubnetRouteTableAssociation": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "RouteTableId": {
-          "Ref": "RouteTableId"
-        },
-        "SubnetId": {
-          "Ref": "privateSubnet"
-        }
-      }
-    },
     "appInstance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.large",
-        "ImageId": "ami-a4c7edb2",
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "AMI"
+          ]
+        },
         "IamInstanceProfile": {
           "Ref": "instanceProfile"
         },
         "SubnetId": {
-          "Ref": "privateSubnet"
+          "Ref": "SubnetId"
         },
         "Tags": [
           {

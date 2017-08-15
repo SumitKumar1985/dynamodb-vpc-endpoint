@@ -1,3 +1,6 @@
 path: templates
 templates:
-  - dynamodb-vpc-endpoint
+  - dynamodb-vpc-endpoint:
+      contexts:
+        - virginia
+        - mumbai

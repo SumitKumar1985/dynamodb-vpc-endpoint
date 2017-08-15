@@ -1,9 +1,17 @@
 {
   "name": "dynamodb-vpc-endpoint",
-  "region": "us-east-1",
   "hasParameters": true,
-  "action": "recreate",
   "capabilities": [
     "CAPABILITY_IAM"
-  ]
+  ],
+  "contexts": {
+    "virginia": {
+      "region": "us-east-1",
+      "action": "recreate"
+    },
+    "mumbai": {
+      "region": "ap-south-1",
+      "action": "recreate"
+    }
+  }
 }
