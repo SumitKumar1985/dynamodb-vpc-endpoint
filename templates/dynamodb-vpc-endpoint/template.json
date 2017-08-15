@@ -13,15 +13,10 @@
       "Description": "The route table Id for the designated public subnet",
       "Type": "String"
     },
-    "ScriptsLocation": {
-      "Description": "public Location of the scripts",
-      "Type": "String",
-      "Default": "https://raw.githubusercontent.com/krishnan-mani/xapp/develop/scripting"
-    },
     "TableName": {
       "Description": "Name of the DynamoDB table for demonstration",
       "Type": "String",
-      "Default": "demo_items_every_minute"
+      "Default": "demo_vpc_items_every_minute"
     }
   },
   "Mappings": {
@@ -35,8 +30,45 @@
     }
   },
   "Resources": {
+    "demoTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": {
+          "Ref": "TableName"
+        },
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "expireAt",
+            "KeyType": "RANGE"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "expireAt",
+            "AttributeType": "N"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        },
+        "TimeToLiveSpecification": {
+          "AttributeName": "expireAt",
+          "Enabled": true
+        }
+      }
+    },
     "dynamoDBWriteRole": {
       "Type": "AWS::IAM::Role",
+      "DependsOn": "demoTable",
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
@@ -143,33 +175,27 @@
                   "Ref": "AWS::Region"
                 },
                 " \n",
-                "curl ",
-                {
-                  "Ref": "ScriptsLocation"
-                },
-                "/table_definition.json -o /home/ec2-user/table_definition.json \n",
-                "curl ",
-                {
-                  "Ref": "ScriptsLocation"
-                },
-                "/put_items_every_minute.sh -o /home/ec2-user/put_items_every_minute.sh \n",
-                "curl ",
-                {
-                  "Ref": "ScriptsLocation"
-                },
-                "/generate_cron_entry.sh -o /home/ec2-user/generate_cron_entry.sh \n",
-                "chown ec2-user:ec2-user /home/ec2-user/* \n",
-                "chmod u+x /home/ec2-user/*.sh \n",
-                "chmod u+r /home/ec2-user/*.json \n",
-                "sudo -u ec2-user bash /home/ec2-user/generate_cron_entry.sh ",
+                "echo '#!/usr/bin/env bash' >> /tmp/put_items.sh\n",
+                "echo 'set -euxo pipefail'>> /tmp/put_items.sh\n",
+                "echo 'NOW_IN_MINUTES=$(date +%Y%m%dT%H%M%z)' >> /tmp/put_items.sh\n",
+                "echo 'EPOCH_TIME=$(date +%s)' >> /tmp/put_items.sh\n",
+                "echo 'ONE_DAY_LATER=$(($EPOCH_TIME+86400))' >> /tmp/put_items.sh\n",
+                "echo 'item=\{\"id\":\{\"S\":\"$NOW_IN_MINUTES\"\},\"expireAt\":\{\"N\":\"$ONE_DAY_LATER\"\},\"hostname\":\{\"S\":\"$(hostname)\"\}\}' >> /tmp/put_items.sh\n",
+                "echo 'echo $item > item.json' >> /tmp/put_items.sh\n",
+                "echo 'aws --region ",
                 {
                   "Ref": "AWS::Region"
                 },
-                " ",
+                " dynamodb put-item --table-name ",
                 {
                   "Ref": "TableName"
                 },
-                " \n",
+                " --item file://item.json' >> /tmp/put_items.sh\n",
+                "cp /tmp/put_items.sh /home/ec2-user/put_items.sh\n",
+                "echo '* * * * * /home/ec2-user/put_items.sh' > /home/ec2-user/crontab.entry\n",
+                "chown ec2-user:ec2-user /home/ec2-user/* \n",
+                "chmod u+x /home/ec2-user/*.sh \n",
+                "crontab -u ec2-user /home/ec2-user/crontab.entry\n",
                 {
                   "Fn::Join": [
                     " ",
@@ -184,7 +210,7 @@
                         "Ref": "AWS::StackId"
                       },
                       "-r",
-                      "workshopInstance",
+                      "appInstance",
                       "-v"
                     ]
                   ]
