@@ -1,7 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Provisions a VPC endpoint for DynamoDB, and demonstrates the use of the same
+Description: Provisions a VPC endpoint for DynamoDB and demonstrates the use of the same
 
 Resources:
+
+  routeTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VpcId
   privateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
