@@ -1,18 +1,10 @@
 [
   {
-    "ParameterKey": "RouteTableId",
-    "ParameterValue": "REPLACE-ME"
-  },
-  {
     "ParameterKey": "VpcId",
     "ParameterValue": "REPLACE-ME"
   },
   {
-    "ParameterKey": "PublicSubnetId",
-    "ParameterValue": "REPLACE-ME"
-  },
-  {
-    "ParameterKey": "ScriptsLocation",
-    "ParameterValue": "https://raw.githubusercontent.com/krishnan-mani/xapp/develop/scripting/"
+    "ParameterKey": "SubnetCidrBlock",
+    "ParameterValue": "172.31.192.0/28"
   }
 ]
