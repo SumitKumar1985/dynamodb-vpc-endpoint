@@ -9,11 +9,6 @@
       "Description": "CIDR Block to assign to the subnet",
       "Type": "String",
       "Default": "172.31.192.0/28"
-    },
-    "TableName": {
-      "Description": "Name of the DynamoDB table for demonstration",
-      "Type": "String",
-      "Default": "demo_vpc_items_every_minute"
     }
   },
   "Mappings": {
@@ -30,9 +25,6 @@
     "demoTable": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
-        "TableName": {
-          "Ref": "TableName"
-        },
         "KeySchema": [
           {
             "AttributeName": "id",
@@ -106,7 +98,7 @@
                         },
                         ":table/",
                         {
-                          "Ref": "TableName"
+                          "Ref": "demoTable"
                         }
                       ]
                     ]
@@ -185,7 +177,7 @@
                 },
                 " dynamodb put-item --table-name ",
                 {
-                  "Ref": "TableName"
+                  "Ref": "demoTable"
                 },
                 " --item file://item.json' >> /tmp/put_items.sh\n",
                 "cp /tmp/put_items.sh /home/ec2-user/put_items.sh\n",
