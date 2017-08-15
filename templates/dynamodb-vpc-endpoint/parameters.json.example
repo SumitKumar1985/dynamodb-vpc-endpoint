@@ -8,7 +8,7 @@
     "ParameterValue": "REPLACE-ME"
   },
   {
-    "ParameterKey": "SubnetId",
+    "ParameterKey": "PublicSubnetId",
     "ParameterValue": "REPLACE-ME"
   },
   {

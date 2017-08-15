@@ -122,7 +122,7 @@
           "Ref": "instanceProfile"
         },
         "SubnetId": {
-          "Ref": "SubnetId"
+          "Ref": "PublicSubnetId"
         },
         "Tags": [
           {
