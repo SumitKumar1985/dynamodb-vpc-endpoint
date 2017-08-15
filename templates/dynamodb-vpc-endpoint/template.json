@@ -121,7 +121,7 @@
         "IamInstanceProfile": {
           "Ref": "instanceProfile"
         },
-        "KeyPair": "km",
+        "KeyName": "km",
         "SubnetId": {
           "Ref": "PublicSubnetId"
         },
