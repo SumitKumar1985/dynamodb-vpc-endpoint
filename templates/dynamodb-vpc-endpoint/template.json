@@ -5,13 +5,10 @@
       "Description": "Id for VPC",
       "Type": "AWS::EC2::VPC::Id"
     },
-    "PublicSubnetId": {
-      "Description": "A public subnet to launch the demo instance",
-      "Type": "String"
-    },
-    "RouteTableId": {
-      "Description": "The route table Id for the designated public subnet",
-      "Type": "String"
+    "SubnetCidrBlock": {
+      "Description": "CIDR Block to assign to the subnet",
+      "Type": "String",
+      "Default": "172.31.192.0/28"
     },
     "TableName": {
       "Description": "Name of the DynamoDB table for demonstration",
@@ -156,7 +153,7 @@
         },
         "KeyName": "km",
         "SubnetId": {
-          "Ref": "PublicSubnetId"
+          "Ref": "privateSubnet"
         },
         "Tags": [
           {
@@ -180,7 +177,7 @@
                 "echo 'NOW_IN_MINUTES=$(date +%Y%m%dT%H%M%z)' >> /tmp/put_items.sh\n",
                 "echo 'EPOCH_TIME=$(date +%s)' >> /tmp/put_items.sh\n",
                 "echo 'ONE_DAY_LATER=$(($EPOCH_TIME+86400))' >> /tmp/put_items.sh\n",
-                "echo 'item=\{\"id\":\{\"S\":\"$NOW_IN_MINUTES\"\},\"expireAt\":\{\"N\":\"$ONE_DAY_LATER\"\},\"hostname\":\{\"S\":\"$(hostname)\"\}\}' >> /tmp/put_items.sh\n",
+                "echo 'item={\\\"id\\\":{\\\"S\\\":\\\"$NOW_IN_MINUTES\\\"},\\\"expireAt\\\":{\\\"N\\\":\\\"$ONE_DAY_LATER\\\"},\\\"hostname\\\":{\\\"S\\\":\\\"$(hostname)\\\"}}' >> /tmp/put_items.sh\n",
                 "echo 'echo $item > item.json' >> /tmp/put_items.sh\n",
                 "echo 'aws --region ",
                 {
@@ -226,7 +223,7 @@
       "Properties": {
         "RouteTableIds": [
           {
-            "Ref": "RouteTableId"
+            "Ref": "routeTable"
           }
         ],
         "ServiceName": {
@@ -243,6 +240,36 @@
         },
         "VpcId": {
           "Ref": "VpcId"
+        }
+      }
+    },
+    "privateSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VpcId"
+        },
+        "CidrBlock": {
+          "Ref": "SubnetCidrBlock"
+        }
+      }
+    },
+    "routeTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    },
+    "subnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "routeTable"
+        },
+        "SubnetId": {
+          "Ref": "privateSubnet"
         }
       }
     }
