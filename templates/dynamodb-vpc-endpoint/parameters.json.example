@@ -8,10 +8,6 @@
     "ParameterValue": "REPLACE-ME-VpcId"
   },
   {
-    "ParameterKey": "ScriptsLocation",
-    "ParameterValue": "REPLACE-ME-ScriptsLocation"
-  },
-  {
     "ParameterKey": "PrivateSubnetCidrBlock",
     "ParameterValue": "172.31.192.0/28"
   }

@@ -11,12 +11,18 @@
     },
     "ScriptsLocation": {
       "Description": "public Location of the scripts",
-      "Type": "String"
+      "Type": "String",
+      "Default": "https://raw.githubusercontent.com/krishnan-mani/xapp/develop/scripting"
     },
     "PrivateSubnetCidrBlock": {
       "Description": "CIDR to be assigned to the private subnet",
       "Type": "String",
       "Default": "172.31.192.0/28"
+    },
+    "TableName": {
+      "Description": "Name of the DynamoDB table for demonstration",
+      "Type": "String",
+      "Default": "demo_items_every_minute"
     }
   },
   "Resources": {
@@ -59,7 +65,10 @@
                         {
                           "Ref": "AWS::AccountId"
                         },
-                        "table/items_every_minute"
+                        "table/",
+                        {
+                          "Ref": "TableName"
+                        }
                       ]
                     ]
                   },
@@ -159,6 +168,10 @@
                 "sudo -u ec2-user bash /home/ec2-user/generate_cron_entry.sh ",
                 {
                   "Ref": "AWS::Region"
+                },
+                " ",
+                {
+                  "Ref": "TableName"
                 },
                 " \n",
                 {

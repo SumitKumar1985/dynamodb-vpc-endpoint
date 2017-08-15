@@ -4,38 +4,37 @@ set -euo pipefail
 
 SCRIPT_NAME="$0"
 
-if [ $# -ne 1 ]
+if [ $# -ne 2 ]
 then
-    echo "Error: missing argument"
-    echo "Usage: ${SCRIPT_NAME} aws-region"
+    echo "Error: missing argument(s)"
+    echo "Usage: ${SCRIPT_NAME} aws-region table-name"
     exit 1
 fi
 REGION="$1"
+TABLE_NAME="$2"
 
-table_name="items_every_minute"
+
 HOSTNAME=$(hostname)
-
 DESCRIBE_TABLE=$(aws dynamodb describe-table \
-    --table-name ${table_name} \
-    --query "Table.[TableName]" --output text || hostname )
+    --table-name ${TABLE_NAME} \
+    --query "Table.[TableName]" --output text || hostname)
 
-if [ "$DESCRIBE_TABLE" = "$table_name" ]
+if [ "$DESCRIBE_TABLE" = "$TABLE_NAME" ]
 then
     echo "Table exists: ${DESCRIBE_TABLE}"
 
 else
     # create table
-
-    echo "Creating table: ${table_name}"
+    echo "Creating table: ${TABLE_NAME}"
     aws --region ${REGION} dynamodb create-table \
-        --table-name ${table_name} \
+        --table-name ${TABLE_NAME} \
         --cli-input-json file://table_definition.json
 
     sleep 30
 
     # update TTL
     aws --region ${REGION} dynamodb update-time-to-live \
-        --table-name ${table_name} \
+        --table-name ${TABLE_NAME} \
         --time-to-live-specification Enabled=true,AttributeName=expireAt
 
 fi
@@ -53,5 +52,5 @@ item="{
 echo "${item}" > item.json
 
 aws --region ${REGION} dynamodb put-item \
-    --table-name ${table_name} \
+    --table-name ${TABLE_NAME} \
     --item file://item.json
