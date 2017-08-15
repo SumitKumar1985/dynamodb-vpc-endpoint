@@ -13,5 +13,5 @@ fi
 REGION="$1"
 TABLE_NAME="$2"
 
-echo "* * * * * /home/ec2-user/put_items_every_minute.sh ${REGION} ${TABLE_NAME}" > mycron
-crontab mycron
+echo "* * * * * /home/ec2-user/put_items_every_minute.sh ${REGION} ${TABLE_NAME}" > /home/ec2-user/mycron
+crontab /home/ec2-user/mycron
