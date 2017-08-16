@@ -1,2 +1,1 @@
-- add AMI mappings for all regions
-- test in all regions
+- implement .yaml template
