@@ -2,6 +2,40 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Provisions a VPC endpoint for DynamoDB and demonstrates the use of the same
 
 Resources:
+  appInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.large
+      ImageId:
+        !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
+      IamInstanceProfile:
+        Ref: instanceProfile
+      KeyName: km
+      SubnetId:
+        Ref: PublicSubnet
+      Tags:
+        -
+          Key: Name
+          Value: dynamodb-writer
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            sudo -u ec2-user aws configure set region ${AWS::Region}
+            echo '#!/usr/bin/env bash' >> /tmp/put_items.sh
+            echo 'set -euxo pipefail' >> /tmp/put_items.sh
+            echo 'NOW_IN_MINUTES=$(date +%Y%m%dT%H%M%z)' >> /tmp/put_items.sh
+            echo 'EPOCH_TIME=$(date +%s)' >> /tmp/put_items.sh
+            echo 'ONE_DAY_LATER=$(($EPOCH_TIME+86400))' >> /tmp/put_items.sh
+            echo 'item={\"id\":{\"S\":\"$NOW_IN_MINUTES\"},\"expireAt\":{\"N\":\"$ONE_DAY_LATER\"},\"hostname\":{\"S\":\"$(hostname)\"}}' >> /tmp/put_items.sh
+            echo 'echo $item > item.json' >> /tmp/put_items.sh
+            echo 'aws --region ${AWS::Region} dynamodb put-item --table-name ${demoTable} --item file://item.json' >> /tmp/put_items.sh
+            cp /tmp/put_items.sh /home/ec2-user/put_items.sh
+            echo '* * * * * /home/ec2-user/put_items.sh' > /home/ec2-user/crontab.entry
+            chown ec2-user:ec2-user /home/ec2-user/*
+            chmod u+x /home/ec2-user/*.sh
+            crontab -u ec2-user /home/ec2-user/crontab.entry
+
   dynamoDBWriteRole:
     Type: AWS::IAM::Role
     DependsOn: demoTable
@@ -31,7 +65,6 @@ Resources:
                   - dynamodb:DescribeTable
                   - dynamodb:CreateTable
                   - dynamodb:UpdateTimeToLive
-
   instanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -43,8 +76,8 @@ Resources:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       RouteTableIds:
-        - Ref: routeTable
-      ServiceName: !Join [ "", [ "com.amazonaws.", !Ref 'AWS::Region', ".dynamodb" ]]
+        - Ref: PublicSubnetRouteTable
+      ServiceName: !Join [ "", [ com.amazonaws., !Ref 'AWS::Region', .dynamodb ]]
       VpcId:
         Ref: VpcId
   demoTable:
@@ -87,6 +120,12 @@ Resources:
         Ref: SubnetCidrBlock
 
 Parameters:
+  PublicSubnet:
+    Description: Public subnet to launch the instance in
+    Type: String
+  PublicSubnetRouteTable:
+    Description: Route table for the public subnet
+    Type: String
   VpcId:
     Description: Id for VPC
     Type: AWS::EC2::VPC::Id
