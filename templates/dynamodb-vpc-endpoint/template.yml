@@ -2,15 +2,51 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Provisions a VPC endpoint for DynamoDB and demonstrates the use of the same
 
 Resources:
+  dynamoDBWriteRole:
+    Type: AWS::IAM::Role
+    DependsOn: demoTable
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        -
+          PolicyName: writer
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Resource: !Join [ "", [ "arn:aws:dynamodb:", !Ref 'AWS::Region', ":", !Ref 'AWS::AccountId', ":", 'table/*' ] ]
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:DescribeTable
+                  - dynamodb:CreateTable
+                  - dynamodb:UpdateTimeToLive
+
+  instanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        -
+          Ref: dynamoDBWriteRole
   vpcEndpointForDynamoDB:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       RouteTableIds:
         - Ref: routeTable
-      ServiceName: !Join ["", [ "com.amazonaws.", !Sub "${AWS::Region}", ".dynamodb" ]]
+      ServiceName: !Join [ "", [ "com.amazonaws.", !Ref 'AWS::Region', ".dynamodb" ]]
       VpcId:
         Ref: VpcId
-
   demoTable:
     Type: AWS::DynamoDB::Table
     Properties:
