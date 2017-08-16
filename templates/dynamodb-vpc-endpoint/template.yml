@@ -10,9 +10,8 @@ Resources:
         !FindInMap [ RegionMap, !Ref 'AWS::Region', AMI ]
       IamInstanceProfile:
         Ref: instanceProfile
-      KeyName: km
       SubnetId:
-        Ref: PublicSubnet
+        Ref: privateSubnet
       Tags:
         -
           Key: Name
@@ -76,7 +75,7 @@ Resources:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       RouteTableIds:
-        - Ref: PublicSubnetRouteTable
+        - Ref: routeTable
       ServiceName: !Join [ "", [ com.amazonaws., !Ref 'AWS::Region', .dynamodb ]]
       VpcId:
         Ref: VpcId
@@ -120,12 +119,6 @@ Resources:
         Ref: SubnetCidrBlock
 
 Parameters:
-  PublicSubnet:
-    Description: Public subnet to launch the instance in
-    Type: String
-  PublicSubnetRouteTable:
-    Description: Route table for the public subnet
-    Type: String
   VpcId:
     Description: Id for VPC
     Type: AWS::EC2::VPC::Id
