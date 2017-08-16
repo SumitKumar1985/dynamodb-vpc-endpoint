@@ -2,5 +2,18 @@ path: templates
 templates:
   - dynamodb-vpc-endpoint:
       contexts:
-        - virginia
+        - dublin
+        - frankfurt
+        - london
+        - montreal
         - mumbai
+        - ohio
+        - portland
+        - san-francisco
+        - sao-paulo
+        - seoul
+        - singapore
+        - sydney
+        - tokyo
+        - virginia
+
