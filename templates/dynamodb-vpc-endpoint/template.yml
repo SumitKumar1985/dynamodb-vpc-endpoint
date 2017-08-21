@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Provisions a VPC endpoint for DynamoDB and demonstrates the use of the same
+Description: Provisions a VPC endpoint for DynamoDB, and launches a demo app on EC2 to demonstrate the same
 
 Parameters:
   VpcId:
